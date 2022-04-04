@@ -99,7 +99,7 @@ public class MelonController {
      */
     @GetMapping(value ="melon/deleteSong")
     public String deleteSong() throws Exception{
-        log.info(this.getClass().getName() + ".deketeSong Start!");
+        log.info(this.getClass().getName() + ".deleteSong Start!");
 
         // 수집 결과 출력
         String msg;
@@ -109,7 +109,7 @@ public class MelonController {
         if(res==1){
             msg = "success";
         }else{
-            msg="feil";
+            msg="fail";
         }
         log.info(this.getClass().getName() + ".deleteSong End!");
 

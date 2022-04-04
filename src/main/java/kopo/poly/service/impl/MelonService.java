@@ -155,12 +155,12 @@ public class MelonService implements IMelonService {
     @Override
     public int deleteSong() throws Exception{
         // 로그 찍기
-        log.info(this.getClass().getName() + ".deleteSong End!");
+        log.info(this.getClass().getName() + ".deleteSong Start!");
 
         int res=0;
 
         //삭제할 컬렉션
-        String colNm = "MELO_" + DateUtil.getDateTime("yyyyMMdd");
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
 
         //수집된 데이터로부터 삭제할 가수명
         String singer ="방탄소년단";
