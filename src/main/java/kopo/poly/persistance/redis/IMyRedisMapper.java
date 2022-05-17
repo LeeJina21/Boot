@@ -95,4 +95,19 @@ public interface IMyRedisMapper {
      * Set 타입에 JSON 형태로 람다식을 이용하여 저장된 값 가져오기
      */
     Set<RedisDTO> getRedisSetJSONRamda(String redisKey)throws Exception;
+
+    /**
+     * zset타입에 json 형태로 저장하기
+     */
+    int saveRedisZSetJSON(String redisKey, List<RedisDTO> pList)throws Exception;
+
+    /**
+     * ZSet타입에 JSON 형태로 저장된 값 가져오기
+     */
+    Set<RedisDTO> getRedisZSetJSON(String redisKey)throws Exception;
+
+    /**
+     * Redis에 JSON 구조로 저장된 데이터 삭제하기
+     */
+    boolean deleteDataJSON(String redisKey) throws Exception;
 }

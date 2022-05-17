@@ -289,4 +289,57 @@ public class RedisController {
 
         return rSet;
     }
+
+    /**
+     * ZSet타입에 JSON 형태로 저장하기
+     */
+    @GetMapping(value ="redis/saveRedisZSetJSON")
+    public String saveRedisZSetJSON() throws Exception{
+
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON 시작");
+
+        //수집 결과 출력
+        String msg;
+
+        int res = myRedisService.saveRedisZSetJSON();
+
+        if(res ==1){
+            msg ="success";
+        }else{
+            msg="fail";
+        }
+
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON 끝");
+
+        return msg;
+    }
+
+    /**
+     * ZSet 타입에 JSON 형태로 저장된 값 가져오기
+     */
+    @GetMapping(value = "redis/getRedisZSetJSON")
+    public Set<RedisDTO> getRedisZSetJSON() throws Exception{
+        log.info(this.getClass().getName() + ".getRedisZSetJSON 시작");
+
+        Set<RedisDTO> rSet = myRedisService.getRedisZSetJSON();
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON 시작");
+
+        return rSet;
+    }
+
+
+    /**
+     * RedisDB 데이터 삭제하기
+     */
+    @GetMapping(value = "redis/deleteDataJSON")
+    public boolean deleteDataJSON() throws Exception{
+        log.info(this.getClass().getName() + ".deleteDataJSON 시작");
+
+        boolean res = myRedisService.deleteDataJSON();
+
+        log.info(this.getClass().getName() + ".deleteDataJSON 끝");
+
+        return res;
+    }
 }

@@ -2,6 +2,7 @@ package kopo.poly.service.impl;
 
 import kopo.poly.dto.MelonDTO;
 import kopo.poly.persistance.mongodb.IMelonMapper;
+import kopo.poly.persistance.redis.IMelonCacheMapper;
 import kopo.poly.service.IMelonService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
@@ -13,10 +14,7 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Slf4j
@@ -26,6 +24,8 @@ public class MelonService implements IMelonService {
     @Resource(name = "MelonMapper")
     private IMelonMapper melonMapper; // MongoDB에 저장할 Mapper
 
+    @Resource(name = "MelonCacheMapper")
+    private IMelonCacheMapper melonCacheMapper; //redisDB에 저장할 Mapper
 
     @Override
     public int collectMelonSongMany() throws Exception{
@@ -76,7 +76,7 @@ public class MelonService implements IMelonService {
         res = melonMapper.insertSongMany(pList, colNm);
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".collectMelonSong End!");
+        log.info(this.getClass().getName() + ".collectMelonSongMany End!");
 
         return res;
     }
@@ -89,9 +89,17 @@ public class MelonService implements IMelonService {
         // MongoDB에 저장된 컬렉션 이름
         String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
 
-        List<MelonDTO> rList = new LinkedList<>();
+        List<MelonDTO> rList = null;
 
-        rList = melonMapper.getSongList(colNm);
+        //List<MelonDTO> rList = new LinkedList<>(); 14장 메이븐 전 코드
+
+        //rList = melonMapper.getSongList(colNm); 14장 메이븐 전 코드
+
+        if(melonCacheMapper.getExistKey(colNm)){
+            rList = melonCacheMapper.getSongList(colNm); //RedisDB에서 데이터 가져오기
+        }else{
+            rList = melonMapper.getSongList(colNm); //MongoDB에서 데이터 가져오기
+        }
 
 
         if (rList == null) {
@@ -259,6 +267,8 @@ public class MelonService implements IMelonService {
         // MongoDB에 데이터저장하기
         res = melonMapper.insertSong(pList, colNm);
 
+        // RedisDB에 데이터 저장하기
+        res = melonCacheMapper.insertSong(pList, colNm);
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + ".collectMelonSong End!");

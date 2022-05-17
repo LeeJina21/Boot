@@ -361,4 +361,85 @@ public class MyRedisMapper implements IMyRedisMapper {
 
         return rSet;
     }
+
+
+    //zset
+    @Override
+    public int saveRedisZSetJSON(String redisKey, List<RedisDTO> pList) throws Exception{
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON 시작");
+
+        int res =0;
+
+        //redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());
+
+        //RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        int idx =0;
+
+        for(RedisDTO dto : pList){
+            redisDB.opsForZSet().add(redisKey, dto, ++idx);
+        }
+
+        // 저장되지 않는 데이터의 유효기간(TTL)은 5시간으로 정의
+        redisDB.expire(redisKey,5,TimeUnit.HOURS);
+
+        res =1;
+
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON 끝");
+
+        return res;
+    }
+
+    @Override
+    public Set<RedisDTO> getRedisZSetJSON(String redisKey) throws Exception{
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON 시작");
+
+        //결과값 전달할 객체
+        Set<RedisDTO> rSet =null;
+
+        //redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());
+
+        //redisDB에저장된 데이터를 자동으로 JSON으로 변경
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        if(redisDB.hasKey(redisKey)){
+            //저장된 전체 레코드 수
+            long cnt = redisDB.opsForZSet().size(redisKey);
+
+            rSet = (Set) redisDB.opsForZSet().range(redisKey,0,cnt);
+        }
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON 끝");
+
+        return rSet;
+    }
+
+    //JSON 타입 삭제
+    @Override
+    public boolean deleteDataJSON(String redisKey) throws Exception{
+
+        log.info(this.getClass().getName() + ".deleteDataJSON 시작");
+
+        //저장되었더 데이터 타입 정의
+        //교수님이 이거 없으면 삭제 안된다고 했는데 없어도 삭제 되는거 확인됨(교수님도 이 코드 2줄 없애라함) 그래도 일단 써두겠음
+        redisDB.setKeySerializer(new StringRedisSerializer());
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        boolean res = false;
+
+        if(redisDB.hasKey(redisKey)){
+            redisDB.delete(redisKey);
+
+            res = true;
+        }
+
+        log.info(this.getClass().getName() + ".deleteDataJSON 끝");
+
+        return res;
+    }
+
 }
