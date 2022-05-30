@@ -11,19 +11,20 @@ import javax.annotation.Resource;
 @RestController
 public class MongoController {
 
-    //Map 객체를 사용한 데이터 처리
+    // Map 객체를 사용한 데이터 처리
     @Resource(name = "MongoService")
     private IMongoService mongoService;
 
     @GetMapping(value = "mongo/test")
     public String test() throws Exception {
 
-        log.info(this.getClass().getName() + "test Start!");
+        log.info(this.getClass().getName() + ".test Start!");
 
         mongoService.mongoTest();
 
-        log.info(this.getClass().getName() + "test End!");
+        log.info(this.getClass().getName() + ".test End!");
 
         return "MongoDB Test!!";
     }
 }
+

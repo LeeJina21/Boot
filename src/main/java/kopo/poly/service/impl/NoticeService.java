@@ -17,13 +17,17 @@ public class NoticeService implements INoticeService {
     private final INoticeMapper noticeMapper;
 
     @Autowired
-    public NoticeService(INoticeMapper noticeMapper){
-        this.noticeMapper =  noticeMapper;
+    public NoticeService(INoticeMapper noticeMapper) {
+        this.noticeMapper = noticeMapper;
     }
 
     @Override
     public List<NoticeDTO> getNoticeList() throws Exception {
+
+        log.info(this.getClass().getName() + ".getNoticeList start!");
+
         return noticeMapper.getNoticeList();
+
     }
 
     @Transactional
@@ -41,11 +45,12 @@ public class NoticeService implements INoticeService {
 
         log.info(this.getClass().getName() + ".getNoticeInfo start!");
 
-        //상세보기 할때마다, 조회수 증가하기
+        // 상세보기 할때마다, 조회수 증가하기
         log.info("Update ReadCNT");
         noticeMapper.updateNoticeReadCnt(pDTO);
 
         return noticeMapper.getNoticeInfo(pDTO);
+
     }
 
     @Transactional
@@ -67,5 +72,4 @@ public class NoticeService implements INoticeService {
         noticeMapper.deleteNoticeInfo(pDTO);
 
     }
-
 }

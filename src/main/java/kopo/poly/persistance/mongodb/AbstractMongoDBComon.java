@@ -16,8 +16,7 @@ public abstract class AbstractMongoDBComon {
      *
      * @param colNm 생성할 컬렉션명
      * @return 생성결과
-    */
-
+     */
     protected boolean createCollection(String colNm) {
 
         boolean res;
@@ -29,27 +28,26 @@ public abstract class AbstractMongoDBComon {
             mongodb.createCollection(colNm);
             res = true;
         }
+
         return res;
     }
-//    protected boolean createCollection(String colNm) {
-//        return createCollection(colNm, "");
-//    }
 
     /**
      * 인덱스 컬럼이 한 개일때 컬렉션 생성
+     *
      * @param colNm 생성할 컬렉션명
      * @param index 생성할 인덱스
      * @return 생성결과
      */
-    protected boolean createCollection(String colNm, String index)  {
+    protected boolean createCollection(String colNm, String index) {
 
-        String[] indexArr = { index };
+        String[] indexArr = {index};
 
         return createCollection(colNm, indexArr);
     }
 
     /**
-     * 인덱스 컬럼이 여러개일때 컬렉션 생성
+     * 인덱스 컬럼이 여러 개일때 컬렉션 생성
      *
      * @param colNm 생성할 컬렉션명
      * @param index 생성할 인덱스
@@ -90,16 +88,17 @@ public abstract class AbstractMongoDBComon {
     /**
      * 컬렉션 삭제
      *
-     * @parom colNm 생성할 컬렉션명
+     * @param colNm 생성할 컬렉션명
      * @return 삭제결과
      */
-    protected boolean dropCollection (String colNm){
+    protected boolean dropCollection(String colNm) {
 
         boolean res = false;
 
-        if(mongodb.collectionExists(colNm)){
+        if (mongodb.collectionExists(colNm)){
             mongodb.dropCollection(colNm);
-            res=true;
+            res = true;
+
         }
 
         return res;

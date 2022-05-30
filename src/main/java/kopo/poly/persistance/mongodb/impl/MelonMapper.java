@@ -12,428 +12,415 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import static com.mongodb.client.model.Updates.set;
 
 import java.util.*;
+
+import static com.mongodb.client.model.Updates.set;
 
 @Slf4j
 @Component("MelonMapper")
 public class MelonMapper extends AbstractMongoDBComon implements IMelonMapper {
 
-	@Override
-	public int insertSong(List<MelonDTO> pList, String colNm) throws Exception {
+    @Override
+    public int dropMelonCollection(String colNm) throws Exception {
 
-		log.info(this.getClass().getName() + ".insertSong Start!");
+        log.info(this.getClass().getName() + ".dropMelonCollection Start!");
 
-		int res = 0;
+        int res = 0;
 
-		if (pList == null) {
-			pList = new LinkedList<>();
-		}
+        super.dropCollection(colNm);
 
-		// 데이터를 저장할 컬렉션 생성
-		super.createCollection(colNm, "collectTime");
+        res = 1;
 
-		// 저장할 컬렉션 객체 생성
-		MongoCollection<Document> col = mongodb.getCollection(colNm);
+        log.info(this.getClass().getName() + ".dropMelonCollection End!");
 
-		List<Document> list = new ArrayList<>();
+        return res;
+    }
 
-		//림다식 활용 stream과 -> 사용
-		pList.stream().forEach(melon -> list.add(new Document(new ObjectMapper().convertValue(melon, Map.class))));
+    @Override
+    public int insertSong(List<MelonDTO> pList, String colNm) throws Exception {
 
-		col.insertMany(list);
+        log.info(this.getClass().getName() + ".insertSong Start!");
 
+        int res = 0;
 
-		res = 1;
+        if (pList == null) {
+            pList = new LinkedList<>();
+        }
 
-		log.info(this.getClass().getName() + ".insertSong End!");
+        // 데이터를 저장할 컬렉션 생성
+        super.createCollection(colNm, "collectTime");
 
-		return res;
-	}
+        // 저장할 컬렉션 객체 생성
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
 
-	@Override
-	public List<MelonDTO> getSongList(String colNm) throws Exception {
-		log.info(this.getClass().getName() + ".getSongList Start");
+        for (MelonDTO pDTO : pList) {
+            if (pDTO == null) {
+                pDTO = new MelonDTO();
 
-		// 조회 결과를 전달하기 위한 객체 생성하기
-		List<MelonDTO> rList = new LinkedList<>();
+            }
 
-		MongoCollection<Document> col = mongodb.getCollection(colNm);
+            // 레코드 한개씩 저장하기
+            col.insertOne(new Document(new ObjectMapper().convertValue(pDTO, Map.class)));
 
-		// 조회 결과 중 출력할 컬럼들(SQL의 SELECT절과 FROM절 가운데 컬럼들과 유사함)
-		Document projection = new Document();
-		projection.append("song", "$song");
-		projection.append("singer", "$singer");
+        }
 
-		// MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
-		// ObjectId를 가지고 오지 않을 때 사용함
-		projection.append("_id", 0);
+        res = 1;
 
-		// MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
-		// ObjectId를 가지고 오지 않을 때 사용함
-		projection.append("_id", 0);
+        log.info(this.getClass().getName() + ".insertSong End!");
 
-		// MongoDB의 find 명령어를 통해 조회할 경우 사용함
-		// 조회하는 데이터의 양이 적은 경우, find를 사용하고, 데이터양이 많은 경우 무조건 Aggregate 사용한다.
-		FindIterable<Document> rs = col.find(new Document()).projection(projection);
+        return res;
+    }
 
-		for (Document doc : rs) {
-			if (doc == null) {
-				doc = new Document();
+    @Override
+    public List<MelonDTO> getSongList(String colNm) throws Exception {
 
-			}
+        log.info(this.getClass().getName() + ".getSongList Start!");
 
-			// 조회 잘되나 출력해 봄
-			String song = CmmUtil.nvl(doc.getString("song"));
-			String singer = CmmUtil.nvl(doc.getString("singer"));
+        // 조회 결과를 전달하기 위한 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
 
-			log.info("song : " + song);
-			log.info("mysinger : " + singer);
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
 
-			MelonDTO rDTO = new MelonDTO();
-			rDTO.setSong(song);
-			rDTO.setSinger(singer);
+        // 조회 결과 중 출력할 컬럼들(SQL의 SELECT절과 FROM절 가운데 컬럼들과 유사함)
+        Document projection = new Document();
+        projection.append("song", "$song");
+        projection.append("singer", "$singer");
 
-			// 레코드 결과를 List에 저장하기
-			rList.add(rDTO);
+        // MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
+        // ObjectId를 가지고 오지 않을 때 사용함
+        projection.append("_id", 0);
 
+        // MongoDB의 find 명령어를 통해 조회할 경우 사용함
+        // 조회하는 데이터의 양이 적은 경우, find를 사용하고, 데이터양이 많은 경우 무조건 Aggregate 사용한다.
+        FindIterable<Document> rs = col.find(new Document()).projection(projection);
 
-		}
+        for (Document doc : rs) {
+            if (doc == null) {
+                doc = new Document();
 
+            }
 
-		log.info(this.getClass().getName() + ".getSongList End!");
+            // 조회 잘되나 출력해 봄
+            String song = CmmUtil.nvl(doc.getString("song"));
+            String singer = CmmUtil.nvl(doc.getString("singer"));
 
-		return rList;
-	}
+            log.info("song : " + song);
+            log.info("singer : " + singer);
 
+            MelonDTO rDTO = new MelonDTO();
 
-	@Override
-	public List<MelonDTO> getSingerSong(String pColNm, String pSinger) throws Exception {
-								////??
-		log.info(this.getClass().getName() + ".getSongList Start!");
+            rDTO.setSong(song);
+            rDTO.setSinger(singer);
 
-		// 조회 결과를 전달하기 위한 객체 생성하기
-		List<MelonDTO> rList = new LinkedList<>();
+            // 레코드 결과를 List에 저장하기
+            rList.add(rDTO);
 
-		MongoCollection<Document> col = mongodb.getCollection(pColNm);
+        }
+        log.info(this.getClass().getName() + ".getSongList End!");
 
-		// 조회할 조건(SQL의 WHERE 역활 / SELECT song, singer FROM ~ where singer ='방탄소년단')
-		Document query = new Document();
-		query.append("singer", pSinger);
+        return rList;
+    }
 
+    @Override
+    public List<MelonDTO> getSingerSongCnt(String colNm) throws Exception {
 
-		// 조회 결과 중 출력할 컬럼들(SQL의 SELECT절과 FROM절 가운데 컬럼들과 유사함)
-		Document projection = new Document();
-		projection.append("song", "$song");
-		projection.append("singer", "$singer");
+        log.info(this.getClass().getName() + ".getSingerSongCnt Start!");
 
-		// MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
-		// ObjectId를 가지고 오지 않을 때 사용함
-		projection.append("_id", 0);
+        // 조회 결과를 전달하기 위한 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
 
-		// MongoDB의 find 명령어를 통해 조회할 경우 사용함
-		// 조회하는 데이터의 양이 적은 경우, find를 사용하고, 데이터양이 많은 경우 무조건 Aggregate 사용한다.
-		FindIterable<Document> rs = col.find(query).projection(projection);
+        // MongoDB 조회 쿼리
+        List<? extends Bson> pipeline = Arrays.asList(
+                new Document().append("$group",
+                        new Document().append("_id", new Document().append("singer", "$singer")).append("COUNT(singer)",
+                                new Document().append("$sum", 1))),
+                new Document()
+                        .append("$project",
+                                new Document().append("singer", "$_id.singer").append("singerCnt", "$COUNT(singer)")
+                                        .append("_id", 0)),
+                new Document().append("$sort", new Document().append("singerCnt", 1)));
 
-		for (Document doc : rs) {
-			if (doc == null) {
-				doc = new Document();
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+        AggregateIterable<Document> rs = col.aggregate(pipeline).allowDiskUse(true);
 
-			}
+        for (Document doc : rs) {
 
-			// 조회 잘되나 출력해 봄
-			String song = CmmUtil.nvl(doc.getString("song"));
-			String singer = CmmUtil.nvl(doc.getString("singer"));
+            if (doc == null) {
+                doc = new Document();
+            }
 
-			log.info("song : " + song);
-			log.info("mysinger : " + singer);
+            String singer = doc.getString("singer");
+            int singerCnt = doc.getInteger("singerCnt", 0);
 
-			MelonDTO rDTO = new MelonDTO();
+            log.info("singer : " + singer);
+            log.info("singerCnt : " + singerCnt);
 
-			rDTO.setSong(song);
-			rDTO.setSinger(singer);
+            MelonDTO rDTO = new MelonDTO();
+            rDTO.setSinger(singer);
+            rDTO.setSingerCnt(singerCnt);
 
-			// 레코드 결과를 List에 저장하기
-			rList.add(rDTO);
+            rList.add(rDTO);
 
-		}
-		log.info(this.getClass().getName() + ".getSongList End!");
+            rDTO = null;
+            doc = null;
+        }
 
-		return rList;
-	}
+        Iterator<Document> cursor = null;
+        rs = null;
+        col = null;
+        pipeline = null;
 
-	@Override
-	public List<MelonDTO> getSingerSongCnt(String colNm) throws Exception {
+        log.info(this.getClass().getName() + ".getSingerSongCnt End!");
 
-		log.info(this.getClass().getName() + ".getSingerSongCnt Start!");
+        return rList;
+    }
 
-		// 조회 결과를 전달하기 위한 객체 생성하기
-		List<MelonDTO> rList = new LinkedList<>();
+    @Override
+    public List<MelonDTO> getSingerSong(String pColNm, String pSinger) throws Exception {
 
-		// MongoDB 조회 쿼리
-		List<? extends Bson> pipeline = Arrays.asList(
-				new Document().append("$group",
-						new Document().append("_id", new Document().append("singer", "$singer")).append("COUNT(singer)",
-								new Document().append("$sum", 1))),
-				new Document()
-						.append("$project",
-								new Document().append("singer", "$_id.singer").append("singerCnt", "$COUNT(singer)")
-										.append("_id", 0)),
-				new Document().append("$sort", new Document().append("singerCnt", 1)));
+        log.info(this.getClass().getName() + ".getSingerSong Start!");
 
-		MongoCollection<Document> col = mongodb.getCollection(colNm);
-		AggregateIterable<Document> rs = col.aggregate(pipeline).allowDiskUse(true);
+        // 조회 결과를 전달하기 위한 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
 
-		for (Document doc : rs) {
+        MongoCollection<Document> col = mongodb.getCollection(pColNm);
 
-			if (doc == null) {
-				doc = new Document();
-			}
+        // 조회할 조건(SQL의 WHERE 역할 /  SELECT song, singer FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", pSinger);
 
-			String singer = doc.getString("singer");
-			int singerCnt = doc.getInteger("singerCnt", 0);
+        // 조회 결과 중 출력할 컬럼들(SQL의 SELECT절과 FROM절 가운데 컬럼들과 유사함)
+        Document projection = new Document();
+        projection.append("song", "$song");
+        projection.append("singer", "$singer");
 
-			log.info("singer : " + singer);
-			log.info("singerCnt : " + singerCnt);
+        // MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
+        // ObjectId를 가지고 오지 않을 때 사용함
+        projection.append("_id", 0);
 
-			MelonDTO rDTO = new MelonDTO();
-			rDTO.setSinger(singer);
-			rDTO.setSingerCnt(singerCnt);
+        // MongoDB의 find 명령어를 통해 조회할 경우 사용함
+        // 조회하는 데이터의 양이 적은 경우, find를 사용하고, 데이터양이 많은 경우 무조건 Aggregate 사용한다.
+        FindIterable<Document> rs = col.find(query).projection(projection);
 
-			rList.add(rDTO);
+        for (Document doc : rs) {
+            if (doc == null) {
+                doc = new Document();
 
-			rDTO = null;
-			doc = null;
-		}
+            }
 
-		Iterator<Document> cursor = null;
-		rs = null;
-		col = null;
-		pipeline = null;
+            // 조회 잘되나 출력해 봄
+            String song = CmmUtil.nvl(doc.getString("song"));
+            String singer = CmmUtil.nvl(doc.getString("singer"));
 
-		log.info(this.getClass().getName() + ".getSingerSongCnt End!");
+            log.info("song : " + song);
+            log.info("mysinger : " + singer);
 
-		return rList;
-	}
+            MelonDTO rDTO = new MelonDTO();
 
-	@Override
-	public int deleteSong(String pColNm, String pSinger) throws Exception{
-		log.info(this.getClass().getName() + ".deleteSong Start!");
+            rDTO.setSong(song);
+            rDTO.setSinger(singer);
 
-		int res =0;
+            // 레코드 결과를 List에 저장하기
+            rList.add(rDTO);
 
-		MongoCollection<Document> col = mongodb.getCollection(pColNm);
+        }
+        log.info(this.getClass().getName() + ".getSingerSong End!");
 
-		//조회할 조건(SQL의 WHERE 역활 / SELECT * FROM MELON_20220321 where singer ='방탄소년단')
-		Document query = new Document();
-		query.append("singer", pSinger);
+        return rList;
 
-		//MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 objectID를 기반으로 데이터를 삭제함
-		//MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 떄문에 정확한 PK에 매핑하기 위해서
-		FindIterable<Document> rs = col.find(query);
+    }
 
-		//람다식 활용하여 데이터 삭제하기
-		//전체 컬렉션에 있는 데이터들을 삭제하기
-		rs.forEach(doc -> col.deleteOne(doc));
+    @Override
+    public int insertSongMany(List<MelonDTO> pList, String colNm) throws Exception {
 
-		res = 1;
+        log.info(this.getClass().getName() + ".insertSongMany Start!");
 
-		log.info(this.getClass().getName() + ".deleteSong End!");
+        int res = 0;
 
-		return res;
-	}
+        if (pList == null) {
+            pList = new LinkedList<>();
+        }
 
-	@Override
-	public int insertSongMany(List<MelonDTO> pList, String colNm) throws Exception{
-		log.info(this.getClass().getName()+".insertSongMany Start");
+        // 데이터를 저장할 컬렉션 생성
+        super.createCollection(colNm, "collectTime");
 
-		int res =0;
+        // 저장할 컬렉션 객체 생성
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
 
-		if (pList == null){
-			pList = new LinkedList<>();
-		}
+        List<Document> list = new ArrayList<>();
 
-		//데이터를 저장할 컬렉션 생성
-		super.createCollection(colNm, "collectTime");
+        // 람다식 활용 stream과 -> 사용
+        pList.stream().forEach(melon -> list.add(new Document(new ObjectMapper().convertValue(melon, Map.class))));
 
-		//저장할 컬렉션 객체 생성
-		MongoCollection<Document> col = mongodb.getCollection(colNm);
+        // 레코드 리스트 단위로 한번에 저장하기
+        col.insertMany(list);
 
-		List<Document> list = new ArrayList<>();
+        res = 1;
 
-		//람다식 활용 stream과 -> 사용
-		pList.stream().forEach(melon -> list.add(new Document(new ObjectMapper().convertValue(melon, Map.class))));
+        log.info(this.getClass().getName() + ".insertSongMany End!");
 
-		//레코드 리스트 단위로 한번에 저장하기
-		col.insertMany(list);
+        return res;
+    }
 
-		res = 1;
+    @Override
+    public int updateSong(String pColNm, String pSinger, String pUpdateSinger) throws Exception {
 
-		log.info(this.getClass().getName()+".insertSongMany End");
+        log.info(this.getClass().getName() + ".updateSong Start!");
 
-		return res;
-	}
+        int res = 0;
 
+        MongoCollection<Document> col = mongodb.getCollection(pColNm);
 
-	/*삭제 공통*/
-	@Override
-	public int dropMelonCollection(String colNm)throws Exception{
-		log.info(this.getClass().getName()+ ".dropMelonCollection Start");
+        log.info("pColNm : " + pColNm);
 
-		int res=0;
+        // 조회할 조건(SQL의 WHERE 역할 /  SELECT * FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", pSinger);
 
-		super.dropCollection(colNm);
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
 
-		res=1;
+        // 람다식 활용하여 데이터 삭제하기
+        // 전체 컬렉션에 있는 데이터들을 삭제하기
+        rs.forEach(doc -> col.updateOne(doc, new Document("$set", new Document("singer", "BTS"))));
 
-		log.info(this.getClass().getName()+ ".dropMelonCollection End");
+        res = 1;
 
-		return res;
-	}
+        log.info(this.getClass().getName() + ".updateSong End!");
 
-	/*가수명 변경*/
-	@Override
-	public int updateSong(String pColNm, String pSinger,String pUpdateSinger)throws Exception{
-		log.info(this.getClass().getName()+ ".updateSong Start");
+        return res;
+    }
 
-		int res=0;
+    @Override
+    public int updateSongAddField(String pColNm, String pSinger, String pNickname) throws Exception {
 
-		MongoCollection<Document> col = mongodb.getCollection(pColNm);
+        log.info(this.getClass().getName() + ".updateSongAddField Start!");
 
-		log.info("pColNm : "+ pColNm);
+        int res = 0;
 
-		//조회할 조건(SQL의 WHERE 역활 / SELECT * REOM MELON_~~ where singer = '방탄소년단')
-		Document query = new Document();
-		query.append("singer", pSinger);
+        MongoCollection<Document> col = mongodb.getCollection(pColNm);
 
-		//MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
-		//MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
-		FindIterable<Document> rs = col.find(query);
+        log.info("pColNm : " + pColNm);
+        log.info("pSinger : " + pSinger);
 
-		//람다식 활용하여 데이터 삭제하기
-		//전체 컬렉션에 있는 데이터들을 삭제하기
-		rs.forEach(doc -> col.updateOne(doc, new Document("$set", new Document("singer", "BTS"))));
+        // 조회할 조건(SQL의 WHERE 역할 /  SELECT * FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", pSinger);
 
-		res=1;
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
 
-		log.info(this.getClass().getName()+ ".updateSong End");
+        // 람다식 활용하여 nickname 필드 추가하기
+        // 전체 컬렉션에 있는 데이터들을 삭제하기
+        rs.forEach(doc -> col.updateOne(doc, set("nickname", pNickname)));
 
+        res = 1;
 
-		return res;
-	}
+        log.info(this.getClass().getName() + ".updateSongAddField End!");
 
-	/*멤버 추가*/
-	/*가수명 변경*/
-	@Override
-	public int updateSongAddField(String pColNm, String pSinger,String pNickname)throws Exception{
-		log.info(this.getClass().getName()+ ".updateSongAddField Start");
+        return res;
+    }
 
-		int res=0;
+    @Override
+    public int updateSongAddListField(String pColNm, String pSinger, List<String> pMember) throws Exception {
 
-		MongoCollection<Document> col = mongodb.getCollection(pColNm);
+        log.info(this.getClass().getName() + ".updateSongAddField Start!");
 
-		log.info("pColNm : "+ pColNm);
-		log.info("pSinger : "+ pSinger);
+        int res = 0;
 
-		//조회할 조건(SQL의 WHERE 역활 / SELECT * REOM MELON_~~ where singer = '방탄소년단')
-		Document query = new Document();
-		query.append("singer", pSinger);
+        MongoCollection<Document> col = mongodb.getCollection(pColNm);
 
-		//MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
-		//MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
-		FindIterable<Document> rs = col.find(query);
+        log.info("pColNm : " + pColNm);
+        log.info("pSinger : " + pSinger);
 
-		//람다식 활용하여 데이터 삭제하기
-		//전체 컬렉션에 있는 데이터들을 삭제하기
-		rs.forEach(doc -> col.updateOne(doc, set("nickname", pNickname)));
+        // 조회할 조건(SQL의 WHERE 역할 /  SELECT * FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", pSinger);
 
-		res=1;
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
 
-		log.info(this.getClass().getName()+ ".updateSong End");
+        // 람다식 활용하여 member 필드 추가하기
+        // 전체 컬렉션에 있는 데이터들을 삭제하기
+        rs.forEach(doc -> col.updateOne(doc, set("member", pMember)));
 
+        res = 1;
 
-		return res;
-	}
+        log.info(this.getClass().getName() + ".updateSongAddField End!");
 
+        return res;
+    }
 
+    @Override
+    public int updateManySong(String pColNm, String pSinger, String pUpdateSinger, String pUpdateSong) throws Exception {
+        log.info(this.getClass().getName() + ".updateManySong Start!");
 
-	@Override
-	public int updateSongAddListField(String pColNm, String pSinger,List<String> pMember)throws Exception{
-		log.info(this.getClass().getName()+ ".updateSongAddListField Start");
+        int res = 0;
 
-		int res=0;
+        MongoCollection<Document> col = mongodb.getCollection(pColNm);
 
-		MongoCollection<Document> col = mongodb.getCollection(pColNm);
+        log.info("pColNm : " + pColNm);
+        log.info("pSinger : " + pSinger);
+        log.info("pUpdateSinger : " + pUpdateSinger);
+        log.info("pUpdateSong : " + pUpdateSong);
 
-		log.info("pColNm : "+ pColNm);
-		log.info("pSinger : "+ pSinger);
+        // 조회할 조건(SQL의 WHERE 역할 /  SELECT * FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", pSinger);
 
-		//조회할 조건(SQL의 WHERE 역활 / SELECT * REOM MELON_~~ where singer = '방탄소년단')
-		Document query = new Document();
-		query.append("singer", pSinger);
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
 
-		//MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
-		//MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
-		FindIterable<Document> rs = col.find(query);
+        // 한줄로 append해서 수정할 필드 추가해도 되지만, 가독성이 떨어져 줄마다 append 함
+        Document updateDoc = new Document();
+        updateDoc.append("singer", pUpdateSinger); // 기존 필드 수정
+        updateDoc.append("song", pUpdateSong); // 기존 필드 수정
+        updateDoc.append("addData", "난 기존 필드 수정과 동시에 추가하는 데이터"); // 신규 필드 추가
 
-		//람다식 활용하여 데이터 삭제하기
-		//전체 컬렉션에 있는 데이터들을 삭제하기
-		rs.forEach(doc -> col.updateOne(doc, set("nickname", pMember)));
+        rs.forEach(doc -> col.updateOne(doc, new Document("$set", updateDoc)));
 
-		res=1;
+        res = 1;
 
-		log.info(this.getClass().getName()+ ".updateSongAddListField End");
+        log.info(this.getClass().getName() + ".updateManySong End!");
 
+        return res;
 
-		return res;
-	}
-	@Override
-	public int updateManySong(String pColNm, String pSinger, String pUpdateSinger, String pUpdateSong) throws Exception {
-		log.info(this.getClass().getName()+ ".updateManySong Start");
+    }
 
-		int res=0;
+    @Override
+    public int deleteSong(String pColNm, String pSinger) throws Exception {
 
-		MongoCollection<Document> col = mongodb.getCollection(pColNm);
+        log.info(this.getClass().getName() + ".deleteSong Start!");
 
+        int res = 0;
 
-		log.info("pColNm : " + pColNm);
-		log.info("pSinger : "+ pSinger);
-		log.info("pUpdateSinger : "+ pUpdateSinger);
-		log.info("pUpdateSong : "+ pUpdateSong);
+        MongoCollection<Document> col = mongodb.getCollection(pColNm);
 
-		//조회할 조건(SQL의 WHERE 역활 / select * FROM MELON_날자 whers singer ='방탄소년단')
-		Document query = new Document();
-		query.append("singer", pSinger);
+        // 조회할 조건(SQL의 WHERE 역할 /  SELECT * FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", pSinger);
 
-		//몽고디비 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 오브젝트아이디를 기반으로 데이터를 삭제함
-		// 몽고디비 환경은 분산환경(sharding)으로 구성될 수 있기 때문에 PK에 매핑하기 위해서임
-		FindIterable<Document> rs = col.find(query);
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectID를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding)으로 구성될 수 있기 때문에 정확한 PK에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
 
-		//한줄로 append해서 수정할 필드 추가해도 되지만, 가독성이 떨어져 줄마다 append함
-		Document updeteDoc = new Document();
-		updeteDoc.append("singer", pUpdateSinger); // 기존 필드 수정
-		updeteDoc.append("song", pUpdateSong); // 기존 필드 수정
-		updeteDoc.append("addData", "난 기존 필드 수정과 동시에 추가되는 데이터"); //신규 필드 추가
+        // 람다식 활용하여 데이터 삭제하기
+        // 전체 컬렉션에 있는 데이터들을 삭제하기
+        rs.forEach(doc -> col.deleteOne(doc));
 
-		rs.forEach(doc -> col.updateOne(doc, new Document("$set", updeteDoc)));
-		
-		res = 1;
-		
-		log.info(this.getClass().getName()+ ".updateManySong End");
+        res = 1;
 
-		return res;
-	}
+        log.info(this.getClass().getName() + ".deleteSong End!");
+
+        return res;
+    }
+
+
 }
-
-
-
-
-
-
-
-
-
 
 

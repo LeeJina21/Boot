@@ -21,7 +21,7 @@ public class ChatService implements IChatService {
     @Override
     public Set<String> getRoomList() throws Exception {
 
-        log.info(this.getClass().getName() + ".getRoomList 시작");
+        log.info(this.getClass().getName() + ".getRoomList Start!");
 
         return chatMapper.getRoomList();
     }
@@ -29,7 +29,7 @@ public class ChatService implements IChatService {
     @Override
     public List<ChatDTO> insertChat(ChatDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getRoomList 시작");
+        log.info(this.getClass().getName() + ".getRoomList Start!");
 
         // 채팅 내용 저장
         if (chatMapper.insertChat(pDTO) == 1) {
@@ -39,7 +39,7 @@ public class ChatService implements IChatService {
             chatMapper.setTimeOutMinute(CmmUtil.nvl(pDTO.getRoomKey()), 5);
 
         } else {
-            log.info("chatMapper.insertChat 끝");
+            log.info("chatMapper.insertChat Fail!");
 
         }
 
@@ -50,7 +50,7 @@ public class ChatService implements IChatService {
     @Override
     public List<ChatDTO> getChat(ChatDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getChat 시작");
+        log.info(this.getClass().getName() + ".getChat Start!");
 
         return chatMapper.getChat(pDTO);
     }

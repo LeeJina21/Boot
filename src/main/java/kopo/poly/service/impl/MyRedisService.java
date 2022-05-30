@@ -12,81 +12,81 @@ import java.util.*;
 @Slf4j
 @Service("MyRedisService")
 public class MyRedisService implements IMyRedisService {
-    @Resource(name="MyRedisMapper")
+
+    @Resource(name = "MyRedisMapper")
     private IMyRedisMapper myRedisMapper;
 
-    @Override
-    public int saveRedisString() throws Exception{
-        log.info(this.getClass().getName() + ".saveRedisString 시작");
 
-        String redisKey="myRedis_String";
+    @Override
+    public int saveRedisString() throws Exception {
+        log.info(this.getClass().getName() + ".saveRedisString Start!");
+
+        String redisKey = "myRedis_String";
 
         RedisDTO pDTO = new RedisDTO();
-        pDTO.setTest_text("난 String타입으로 지정할 일반 문자열이다!!!");
+        pDTO.setTest_text("난 String타입으로 저장할 일반 문자열이다.");
 
         int res = myRedisMapper.saveRedisString(redisKey, pDTO);
 
-        log.info(this.getClass().getName() + ".saveRedisString 끝");
+
+        log.info(this.getClass().getName() + ".saveRedisString End!");
 
         return res;
     }
-/**피피티 확인*/
+
     @Override
-    public RedisDTO getRedisString() throws Exception{
-        log.info(this.getClass().getName() + ".etRedisString 시작");
+    public RedisDTO getRedisString() throws Exception {
+        log.info(this.getClass().getName() + ".getRedisString Start!");
 
         String redisKey = "myRedis_String";
 
         RedisDTO rDTO = myRedisMapper.getRedisString(redisKey);
 
-        if(rDTO == null){
+        if (rDTO == null) {
             rDTO = new RedisDTO();
         }
 
-        log.info(this.getClass().getName() + ".etRedisString 끝");
+        log.info(this.getClass().getName() + ".getRedisString End!");
 
         return rDTO;
     }
 
-
     @Override
-    public int saveRedisStringJSON() throws Exception{
-        log.info(this.getClass().getName() + ".etRedisStringJSON 시작");
+    public int saveRedisStringJSON() throws Exception {
+        log.info(this.getClass().getName() + ".saveRedisStringJSON Start!");
 
         String redisKey = "myRedis_String_JSON";
 
         RedisDTO pDTO = new RedisDTO();
-        pDTO.setTest_text("난 Strint타입에 JSON 구조로 저장할 일반 문자열");
-        pDTO.setName("이진아");
-        pDTO.setAddr("경기도");
-        pDTO.setEmail("JNA@naver.com");
+        pDTO.setTest_text("난 String타입에 JSON 구조로 저장할 일반 문자열이다.");
+        pDTO.setName("이협건");
+        pDTO.setAddr("서울");
+        pDTO.setEmail("hglee67@kopo.ac.kr");
 
         int res = myRedisMapper.saveRedisStringJSON(redisKey, pDTO);
 
-        log.info(this.getClass().getName() + ".etRedisStringJSON 끝");
+        log.info(this.getClass().getName() + ".saveRedisStringJSON End!");
 
         return res;
     }
-/**피피티 확인 끝*/
 
     @Override
-    public RedisDTO getRedisStringJSON() throws Exception{
+    public RedisDTO getRedisStringJSON() throws Exception {
 
-        log.info(this.getClass().getName() + ".getRedisStringJSON 시작");
+        log.info(this.getClass().getName() + ".getRedisStringJSON Start!");
 
         String redisKey = "myRedis_String_JSON";
 
         RedisDTO rDTO = myRedisMapper.getRedisStringJSON(redisKey);
 
-        if(rDTO==null){
-            rDTO= new RedisDTO();
+        if (rDTO == null) {
+            rDTO = new RedisDTO();
         }
 
-        log.info(this.getClass().getName() + ".getRedisStringJSON 끝");
+        log.info(this.getClass().getName() + ".getRedisStringJSON End!");
 
         return rDTO;
     }
-
 
     @Override
     public int saveRedisList() throws Exception {
@@ -98,6 +98,7 @@ public class MyRedisService implements IMyRedisService {
         List<RedisDTO> pList = new LinkedList<>();
 
         for (int i = 0; i < 10; i++) {
+
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
 
@@ -117,12 +118,13 @@ public class MyRedisService implements IMyRedisService {
 
         log.info(this.getClass().getName() + ".getRedisList Start!");
 
-        String redisKsy = "myRedis_List";
+        String redisKey = "myRedis_List";
 
-        List<String> rList = myRedisMapper.getRedisList(redisKsy);
+        List<String> rList = myRedisMapper.getRedisList(redisKey);
 
         if (rList == null) {
             rList = new LinkedList<>();
+
         }
 
         log.info(this.getClass().getName() + ".getRedisList End!");
@@ -142,9 +144,9 @@ public class MyRedisService implements IMyRedisService {
 
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
-            pDTO.setName("이진아[" + i + "]");
-            pDTO.setAddr("경기도");
-            pDTO.setEmail("gsejglsegj@naver.com");
+            pDTO.setName("이협건[" + i + "]");
+            pDTO.setAddr("서울");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pList.add(pDTO);
             pDTO = null;
@@ -182,15 +184,15 @@ public class MyRedisService implements IMyRedisService {
 
         String redisKey = "myRedis_List_JSON_Ramda";
 
-        List<RedisDTO> pList =  new ArrayList<>();
+        List<RedisDTO> pList = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
 
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
-            pDTO.setName("이진아[" + i + "]");
-            pDTO.setAddr("경기도");
-            pDTO.setEmail("dfjlsefjl@naver.com");
+            pDTO.setName("이협건[" + i + "]");
+            pDTO.setAddr("서울");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pList.add(pDTO);
             pDTO = null;
@@ -222,142 +224,160 @@ public class MyRedisService implements IMyRedisService {
         return rList;
     }
 
-
     @Override
-    public int saveRedisHash() throws Exception{
+    public int saveRedisHash() throws Exception {
 
-        log.info(this.getClass().getName()+".saveRedisHash 시작");
+        log.info(this.getClass().getName() + ".saveRedisHash Start!");
 
         String redisKey = "myRedis_Hash";
 
         RedisDTO pDTO = new RedisDTO();
-        pDTO.setName("이진아");
-        pDTO.setAddr("경기도");
-        pDTO.setEmail("ifdifis@naver.com");
+        pDTO.setName("이협건");
+        pDTO.setAddr("서울");
+        pDTO.setEmail("hglee67@kopo.ac.kr");
 
         int res = myRedisMapper.saveRedisHash(redisKey, pDTO);
 
-        log.info(this.getClass().getName()+".saveRedisHash 끝");
+        log.info(this.getClass().getName() + ".saveRedisHash End!");
 
         return res;
     }
 
     @Override
-    public RedisDTO getRedisHash() throws Exception{
-        log.info(this.getClass().getName()+".saveRedisHash 시작");
+    public RedisDTO getRedisHash() throws Exception {
+
+        log.info(this.getClass().getName() + ".getRedisHash Start!");
 
         String redisKey = "myRedis_Hash";
 
         RedisDTO rDTO = myRedisMapper.getRedisHash(redisKey);
 
-        if(rDTO == null){
-            rDTO=new RedisDTO();
+        if (rDTO == null) {
+            rDTO = new RedisDTO();
         }
 
-        log.info(this.getClass().getName()+".saveRedisHash 끝");
+        log.info(this.getClass().getName() + ".getRedisHash End!");
 
         return rDTO;
     }
 
     @Override
-    public int saveRedisSetJSONRamda() throws Exception{
+    public int saveRedisSetJSONRamda() throws Exception {
 
-        log.info(this.getClass().getName() + ".saveRedissaveRedisSetJSONRamda 시작");
+        log.info(this.getClass().getName() + ".saveRedisSetJSONRamda Start!");
 
         String redisKey = "myRedis_Set_JSON";
 
         Set<RedisDTO> pSet = new HashSet<>();
 
-        for (int i =0; i<10; i++){
+        for (int i = 0; i < 10; i++) {
+
             RedisDTO pDTO = new RedisDTO();
-            pDTO.setTest_text(i + "번째 데이터입니다");
-            pDTO.setName("이진아[" + i + "]");
-            pDTO.setAddr("경기도");
-            pDTO.setEmail("falwjif@naver.com");
+            pDTO.setTest_text(i + "번째 데이터입니다.");
+            pDTO.setName("이협건[" + i + "]");
+            pDTO.setAddr("서울");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pSet.add(pDTO);
-            pDTO=null;
+            pDTO = null;
         }
 
         int res = myRedisMapper.saveRedisSetJSONRamda(redisKey, pSet);
 
-        log.info(this.getClass().getName() + ".saveRedissaveRedisSetJSONRamda 끝");
+        log.info(this.getClass().getName() + ".saveRedisSetJSONRamda End!");
 
         return res;
     }
 
     @Override
-    public Set<RedisDTO> getRedisSetJSONRamda() throws Exception{
+    public Set<RedisDTO> getRedisSetJSONRamda() throws Exception {
 
-        log.info(this.getClass().getName() + ".getRedissaveRedisSetJSONRamda 시작");
+        log.info(this.getClass().getName() + ".getRedisSetJSONRamda Start!");
 
         String redisKey = "myRedis_Set_JSON";
 
         Set<RedisDTO> rSet = myRedisMapper.getRedisSetJSONRamda(redisKey);
 
-        if(rSet == null){
+        if (rSet == null) {
             rSet = new HashSet<>();
+
         }
 
-        log.info(this.getClass().getName() + ".getRedissaveRedisSetJSONRamda 끝");
+        log.info(this.getClass().getName() + ".getRedisSetJSONRamda End!");
 
         return rSet;
     }
 
     @Override
-    public int saveRedisZSetJSON() throws Exception{
-
-        log.info(this.getClass().getName() + ".saveRedisZSetJSON 시작");
+    public int saveRedisZSetJSON() throws Exception {
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON Start!");
 
         String redisKey = "myRedis_Zset_JSON";
 
         List<RedisDTO> pList = new LinkedList<>();
 
-        for(int i = 0; i<10; i++){
+        for (int i = 0; i < 10; i++) {
+
             RedisDTO pDTO = new RedisDTO();
-            pDTO.setTest_text(i + "번째 데이터입니다");
-            pDTO.setName("이진아[" + i +"]");
-            pDTO.setAddr("경기도");
-            pDTO.setEmail("egsge@naver.com");
+            pDTO.setTest_text(i + "번째 데이터입니다.");
+            pDTO.setName("이협건[" + i + "]");
+            pDTO.setAddr("서울");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pList.add(pDTO);
             pDTO = null;
         }
 
-        int res= myRedisMapper.saveRedisZSetJSON(redisKey, pList);
+        int res = myRedisMapper.saveRedisZSetJSON(redisKey, pList);
 
-        log.info(this.getClass().getName() + ".saveRedisZSetJSON 끝");
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON End!");
 
         return res;
     }
 
     @Override
-    public Set<RedisDTO> getRedisZSetJSON() throws Exception{
-        log.info(this.getClass().getName() + ".getRedisZSetJSON 시작");
+    public Set<RedisDTO> getRedisZSetJSON() throws Exception {
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON Start!");
 
         String redisKey = "myRedis_Zset_JSON";
 
         Set<RedisDTO> rSet = myRedisMapper.getRedisZSetJSON(redisKey);
 
-        if(rSet == null){
+        if (rSet == null) {
             rSet = new HashSet<>();
+
         }
 
-        log.info(this.getClass().getName() + ".getRedisZSetJSON 끝");
+        log.info(this.getClass().getName() + ".getRedisZSetJSON End!");
 
         return rSet;
     }
 
-    //JSON 데이터 타입 삭제
     @Override
-    public boolean deleteDataJSON() throws Exception{
-        log.info(this.getClass().getName() + ".deleteDataJSON 시작");
+    public boolean deleteDataJSON() throws Exception {
+
+        log.info(this.getClass().getName() + ".deleteDate Start!");
 
         String redisKey = "myRedis_Zset_JSON";
 
         boolean res = myRedisMapper.deleteDataJSON(redisKey);
 
-        log.info(this.getClass().getName() + ".deleteDataJSON 끝");
+        log.info(this.getClass().getName() + ".deleteDate End!");
+
+        return res;
+    }
+
+    @Override
+    public boolean deleteDataString() throws Exception {
+
+        log.info(this.getClass().getName() + ".deleteDataString Start!");
+
+        String redisKey = "myRedis_Hash";
+
+        boolean res = myRedisMapper.deleteDataJSON(redisKey);
+
+        log.info(this.getClass().getName() + ".deleteDataString End!");
 
         return res;
     }

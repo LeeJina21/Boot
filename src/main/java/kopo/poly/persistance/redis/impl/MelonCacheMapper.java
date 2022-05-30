@@ -18,7 +18,7 @@ public class MelonCacheMapper implements IMelonCacheMapper {
 
     public final RedisTemplate<String, Object> redisDB;
 
-    public MelonCacheMapper(RedisTemplate<String, Object>redisDB){
+    public MelonCacheMapper(RedisTemplate<String, Object> redisDB) {
         this.redisDB = redisDB;
     }
 
@@ -29,16 +29,16 @@ public class MelonCacheMapper implements IMelonCacheMapper {
 
         int res = 0;
 
-        //Redis에 저장될 키
+        // Redis에 저장될 키
         String key = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
 
         redisDB.setKeySerializer(new StringRedisSerializer());
         redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(MelonDTO.class));
 
-        //림다식 활용 stream과 -> 사용
+        // 람다식으로 데이터 저장하기
         pList.forEach(melon -> redisDB.opsForList().leftPush(key, melon));
 
-        //저장된 데이터는 1시간동안 보관
+        // 저장된 데이터는 1시간동안 보관하기
         redisDB.expire(key, 1, TimeUnit.HOURS);
 
         res = 1;
@@ -49,32 +49,36 @@ public class MelonCacheMapper implements IMelonCacheMapper {
     }
 
     @Override
-    public boolean getExistKey(String key) throws Exception{
-        //저장된 키가 존재한다면
-        if(redisDB.hasKey(key)){
+    public boolean getExistKey(String key) throws Exception {
+
+        // 저장된 키가 존재한다면...
+        if (redisDB.hasKey(key)) {
             return true;
-        }else{
+
+        } else {
             return false;
+
         }
     }
 
     @Override
-    public List<MelonDTO> getSongList(String key)throws Exception{
+    public List<MelonDTO> getSongList(String key) throws Exception {
 
-        log.info(this.getClass().getName() + ".getSongList 시작!");
+        log.info(this.getClass().getName() + ".getSongList Start!");
 
         redisDB.setKeySerializer(new StringRedisSerializer());
         redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(MelonDTO.class));
 
-        List<MelonDTO> rList =null;
+        List<MelonDTO> rList = null;
 
-        //저장된 키가 존재한다면
-        if(redisDB.hasKey(key)){
+        // 저장된 키가 존재한다면...
+        if (redisDB.hasKey(key)) {
             rList = (List) redisDB.opsForList().range(key, 0, -1);
         }
 
         log.info(this.getClass().getName() + ".getSongList End!");
 
-        return  rList;
+        return rList;
     }
 }
+
